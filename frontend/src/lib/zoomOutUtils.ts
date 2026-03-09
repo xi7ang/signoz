@@ -87,6 +87,21 @@ export interface ZoomOutResult {
 	preset: Time | CustomTimeType | null;
 }
 
+function getPresetForDuration(
+	durationMs: number,
+): Time | CustomTimeType | null {
+	const knownPreset = PRESET_FOR_DURATION_MS[durationMs];
+	if (knownPreset) {
+		return knownPreset;
+	}
+
+	if (durationMs < MIN_LADDER_DURATION_MS && durationMs % MS_PER_MIN === 0) {
+		return `${durationMs / MS_PER_MIN}m`;
+	}
+
+	return null;
+}
+
 /**
  * Computes the next zoomed-out time range.
  * Phase 1 (center-anchored): While new end <= now, expand from center.
@@ -130,7 +145,7 @@ export function getNextZoomOutRange(
 
 	// Phase 2 only: use preset so GetMinMax produces "last X from now".
 	// Phase 1: preset=null so the center-anchored range is preserved (GetMinMax would discard it).
-	const preset = isPhase1 ? null : PRESET_FOR_DURATION_MS[newDurationMs] ?? null;
+	const preset = isPhase1 ? null : getPresetForDuration(newDurationMs);
 
 	return {
 		range: [Math.round(newStartMs), Math.round(newEndMs)],

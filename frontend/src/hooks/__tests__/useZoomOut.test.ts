@@ -9,6 +9,7 @@ const mockSafeNavigate = jest.fn();
 const mockUrlQueryDelete = jest.fn();
 const mockUrlQuerySet = jest.fn();
 const mockUrlQueryToString = jest.fn(() => '');
+const mockPersistTimeDurationForRoute = jest.fn();
 
 interface MockAppState {
 	globalTime: Pick<GlobalReducer, 'minTime' | 'maxTime'>;
@@ -62,6 +63,13 @@ jest.mock('lib/zoomOutUtils', () => ({
 		mockGetNextZoomOutRange(...args),
 }));
 
+jest.mock('utils/metricsTimeStorageUtils', () => ({
+	persistTimeDurationForRoute: (
+		...args: unknown[]
+	): ReturnType<typeof mockPersistTimeDurationForRoute> =>
+		mockPersistTimeDurationForRoute(...args),
+}));
+
 describe('useZoomOut', () => {
 	beforeEach(() => {
 		jest.clearAllMocks();
@@ -110,6 +118,10 @@ describe('useZoomOut', () => {
 		expect(mockUrlQueryDelete).toHaveBeenCalledWith(QueryParams.startTime);
 		expect(mockUrlQueryDelete).toHaveBeenCalledWith(QueryParams.endTime);
 		expect(mockUrlQuerySet).toHaveBeenCalledWith(QueryParams.relativeTime, '45m');
+		expect(mockPersistTimeDurationForRoute).toHaveBeenCalledWith(
+			'/logs-explorer',
+			'45m',
+		);
 		expect(mockSafeNavigate).toHaveBeenCalledWith(
 			expect.stringContaining('/logs-explorer'),
 		);
@@ -134,6 +146,10 @@ describe('useZoomOut', () => {
 		);
 		expect(mockUrlQuerySet).toHaveBeenCalledWith(QueryParams.endTime, '2000000');
 		expect(mockUrlQueryDelete).toHaveBeenCalledWith(QueryParams.relativeTime);
+		expect(mockPersistTimeDurationForRoute).toHaveBeenCalledWith(
+			'/logs-explorer',
+			'{"startTime":1000000,"endTime":2000000}',
+		);
 		expect(mockSafeNavigate).toHaveBeenCalledWith(
 			expect.stringContaining('/logs-explorer'),
 		);

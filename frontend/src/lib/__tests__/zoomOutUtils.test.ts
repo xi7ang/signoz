@@ -143,5 +143,18 @@ describe('zoomOutUtils', () => {
 			const [newStart, newEnd] = result.range;
 			expect(newEnd - newStart).toBe(15 * MS_PER_MIN);
 		});
+
+		it('should return shorthand preset for sub-15m Phase 2 zoom out', () => {
+			// 3m range ending at now -> 3x = 9m and should stay relative ("9m")
+			const start3m = NOW_MS - 3 * MS_PER_MIN;
+			const end3m = NOW_MS;
+			const result = getNextZoomOutRange(start3m, end3m) as ZoomOutResult;
+
+			expect(result).not.toBeNull();
+			expect(result.preset).toBe('9m');
+			const [newStart, newEnd] = result.range;
+			expect(newEnd).toBe(NOW_MS);
+			expect(newEnd - newStart).toBe(9 * MS_PER_MIN);
+		});
 	});
 });
